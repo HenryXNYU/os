@@ -1,6 +1,4 @@
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.io.*;
 
@@ -12,13 +10,12 @@ public class Linker {
 
     public Linker(String file_name) throws IOException {
         //create output file and close
-
         this.output.add("Symbol Table \n");
         this.output.add("\n");
         this.output.add("Memory Map \n");
 
-        this.input = Files.readAllLines(Paths.get(file_name));
-
+        //TODO: [DONE]clean input
+        this.input = input_clean(file_name);
         for (int i = 0; i < this.input.size(); i++){
             if (this.input.get(i).compareTo("") == 0){
                 this.input.remove(i);
@@ -43,9 +40,9 @@ public class Linker {
                     String[] line_content = input.get(input_line).split("\\s+");
 
                     //remove white space
-                    List<String> list = new ArrayList<String>(Arrays.asList(line_content));
-                    list.removeAll(Arrays.asList(""));
-                    line_content = list.toArray(new String[0]);
+                    //List<String> list = new ArrayList<String>(Arrays.asList(line_content));
+                    //list.removeAll(Arrays.asList(""));
+                    //line_content = list.toArray(new String[0]);
 
                     for(int i = 0; i < Integer.parseInt(line_content[0])*2; i += 2){
                         int address = Integer.parseInt(line_content[2 + i]) + offset;
@@ -105,12 +102,6 @@ public class Linker {
             //handle the usage line
             if (input_line % 3 == 2 && this.input.get(input_line).length() > 1){
                 String[] line_content = input.get(input_line).split("\\s+");
-
-                //remove white space
-                List<String> list = new ArrayList<String>(Arrays.asList(line_content));
-                list.removeAll(Arrays.asList(""));
-                line_content = list.toArray(new String[0]);
-
                 for(int i = 0; i < Integer.parseInt(line_content[0]) * 2; i += 2){
                     int address = Integer.parseInt(line_content[2 + i]);
                     String key = line_content[1 + i];
@@ -118,12 +109,6 @@ public class Linker {
                 }
             }else if (input_line % 3 == 0){                                              //handle type 1 2 3
                 String[] line_content = input.get(input_line).split("\\s+");
-
-                //remove white space
-                List<String> list = new ArrayList<String>(Arrays.asList(line_content));
-                list.removeAll(Arrays.asList(""));
-                line_content = list.toArray(new String[0]);
-
                 for (int i = 1; i < line_content.length; i++){
                     char[] words = line_content[i].toCharArray();
                     int address = Integer.parseInt(line_content[i].substring(0,4));
@@ -154,17 +139,59 @@ public class Linker {
                 offset += Integer.parseInt(line_content[0]);
             }
         }
-
     }
+
+    public List<String> input_clean(String filename) {
+        List<String> clean_input = new ArrayList<>();
+        try (Scanner sc = new Scanner(new File(filename))) {
+            int input_pointer = 0;
+            int line_type = 1;
+            while (sc.hasNext()){
+                if (input_pointer == 0){
+                    clean_input.add(sc.next());
+                }else{
+                    if (line_type == 1){
+                        String next = sc.next();
+                        clean_input.add(next);
+                        int num_of_definition = Integer.parseInt(next);
+                        for (int i = 1; i<= num_of_definition*2; i++){
+                            int temp = clean_input.size() - 1;
+                            clean_input.set(temp, clean_input.get(temp)+ " " + sc.next());
+                        }
+                        line_type = 2;
+                    }else if (line_type == 2){
+                        String next = sc.next();
+                        clean_input.add(next);
+                        int num_of_usage = Integer.parseInt(next);
+                        for (int i = 1; i<= num_of_usage*2; i++){
+                            int temp = clean_input.size() - 1;
+                            clean_input.set(temp, clean_input.get(temp)+ " " + sc.next());
+                        }
+                        line_type = 3;
+                    }else if (line_type == 3){
+                        String next = sc.next();
+                        clean_input.add(next);
+                        int num_of_address = Integer.parseInt(next);
+                        for (int i = 1; i<= num_of_address; i++){
+                            int temp = clean_input.size() - 1;
+                            clean_input.set(temp, clean_input.get(temp)+ " " + sc.next());
+                        }
+                        line_type = 1;
+                    }
+                }
+                input_pointer++;
+            }
+        }catch (java.io.FileNotFoundException e){
+            System.out.println("No such file");
+        }
+
+        return clean_input;
+    }
+
+
     public void resolve_external(String key, int list_index, int line, int offset, int output_counter){
         int new_index = list_index+1;
         String[] address_line = this.input.get(line).split("\\s+");
-
-        //remove white space
-        List<String> list = new ArrayList<String>(Arrays.asList(address_line));
-        list.removeAll(Arrays.asList(""));
-        address_line = list.toArray(new String[0]);
-
         String string_word = address_line[new_index];
         char[] char_word = string_word.toCharArray();
         int next_address = Integer.parseInt(string_word.substring(1,4));
@@ -198,17 +225,10 @@ public class Linker {
                 output_position++;
             }
         }
-
-        //String string_word = address_line[new_index];
-        //char[] char_word = string_word.toCharArray();
-        //int next_address = Integer.parseInt(string_word.substring(1,4));
-        //boolean flag = true;
-
         while(flag){
             String op_code = Character.toString(char_word[0]);
             String new_address = op_code + external_address.toString();
             int output_position = output_counter + offset + list_index;
-            //this.output.add(output_position, this.output.get(output_position)+ new_address);
             this.output.set(output_position, this.output.get(output_position)+ new_address + "\n");
 
             if (next_address == 777){
@@ -242,6 +262,7 @@ public class Linker {
         pw.close();
     }
     public static void main(String[] args) throws IOException {
+        //String file_name = "input-2";
         String file_name = args[0];
         Linker lk = new Linker(file_name);
         lk.run();
