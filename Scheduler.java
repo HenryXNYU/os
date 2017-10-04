@@ -1233,7 +1233,7 @@ class HPRN_comparitor implements Comparator<float[]>{
     }
 }
 
-public class PriorityQueue<E> extends AbstractQueue<E>
+class PriorityQueue<E> extends AbstractQueue<E>
     implements java.io.Serializable {
     private static final long serialVersionUID = -7720805057305804111L;
     private static final int DEFAULT_INITIAL_CAPACITY = 11;
