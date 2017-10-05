@@ -83,13 +83,17 @@ public class Scheduler {
     public static void main(String[] args) throws FileNotFoundException {
         boolean vb_flag =false;
         String file_name;
+
+        /*
         try {
             file_name = args[1];
             vb_flag = true;
         }catch (java.lang.ArrayIndexOutOfBoundsException e){
             file_name = args[0];
         }
-        //String file_name = "input-7.txt";
+        */
+
+        file_name = "input-7.txt";
         Scheduler ob_FCFS = new Scheduler(file_name, vb_flag);
         ob_FCFS.run_FCFS(vb_flag);
         Scheduler ob_RR = new Scheduler(file_name, vb_flag);
@@ -106,14 +110,13 @@ class RR_class{
     ArrayList<Process> processes_list;
     ArrayList<int[]> running;
     LinkedList<int[]> ready;
-    PriorityQueue<int[]> processes;
+    Priority<int[]> processes;
     LinkedList<int[]> blocked;
     int TIME, all_finished_time, quantum;
     boolean terminate, vb_flag;
 
     public RR_class(boolean vb_flag, ArrayList<Process> processes_list){
         Comparator<int[]> FCFS_comparator = new FCFS_comparitor();
-        this.processes = new PriorityQueue<>(FCFS_comparator);
         this.processes_list = processes_list;
         this.running = new ArrayList<int[]>(1);
         this.ready = new LinkedList<int[]>(); //([arrival time], [index in processes+list])
@@ -123,7 +126,7 @@ class RR_class{
         this.TIME = 0;
         this.quantum = 2;
         //order process following the tie rule
-        this.processes = new PriorityQueue<>(FCFS_comparator); // ([arrival time], [index in process_list])
+        this.processes = new Priority<int[]>(20,FCFS_comparator); // ([arrival time], [index in process_list])
         for (Process p : this.processes_list) {
             int[] pair = new int[2];
             pair[0] = p.getArrive_time();
@@ -336,23 +339,23 @@ class RR_class{
 class FCFS_class {
     ArrayList<Process> processes_list;
     ArrayList<int[]> running;
-    PriorityQueue<int[]> ready, processes;
+    Priority<int[]> ready, processes;
     LinkedList<int[]> blocked;
     int TIME, all_finished_time;
     boolean terminate, vb_flag;
 
     public FCFS_class(boolean vb_flag, ArrayList<Process> processes_list) {
         Comparator<int[]> FCFS_comparator = new FCFS_comparitor();
-        this.processes = new PriorityQueue<>(FCFS_comparator);
+        //this.processes = new Priority<>(20,FCFS_comparator);
         this.processes_list = processes_list;
         this.running = new ArrayList<int[]>(1);
-        this.ready = new PriorityQueue<>(FCFS_comparator); //([arrival time], [index in processes+list])
+        this.ready = new Priority<>(20, FCFS_comparator); //([arrival time], [index in processes+list])
         this.blocked = new LinkedList<int[]>();
         this.terminate = false;
         this.vb_flag = vb_flag;
         this.TIME = 0;
         //order process following the tie rule
-        this.processes = new PriorityQueue<>(FCFS_comparator); // ([arrival time], [index in process_list])
+        this.processes = new Priority<>(20, FCFS_comparator); // ([arrival time], [index in process_list])
         for (Process p : this.processes_list) {
             int[] pair = new int[2];
             pair[0] = p.getArrive_time();
@@ -424,7 +427,7 @@ class FCFS_class {
             }
         }
     }
-    public void update_block_FCFS(LinkedList<int[]> blocked, PriorityQueue<int[]> ready, List<int[]> running,int TIME){
+    public void update_block_FCFS(LinkedList<int[]> blocked, Priority<int[]> ready, List<int[]> running,int TIME){
         if (!blocked.isEmpty()){
             for (int i = 0; i < blocked.size();i++) {
                 int[] first_blocked = blocked.get(i);
@@ -452,7 +455,7 @@ class FCFS_class {
         }
     }
 
-    public void update_ready_FCFS(PriorityQueue<int[]> ready, List<int[]> running){
+    public void update_ready_FCFS(Priority<int[]> ready, List<int[]> running){
         if (!ready.isEmpty()) {
             int[] first_ready = ready.peek();
             Process p = processes_list.get(first_ready[1]);
@@ -551,7 +554,7 @@ class FCFS_class {
 class SJF_class{
     ArrayList<Process> processes_list;
     ArrayList<int[]> running;
-    PriorityQueue<int[]> ready, processes;
+    Priority<int[]> ready, processes;
     LinkedList<int[]> blocked;
     int TIME, all_finished_time;
     boolean terminate, vb_flag;
@@ -561,13 +564,13 @@ class SJF_class{
         Comparator<int[]> FCFS_comparator = new FCFS_comparitor();
         this.processes_list = processes_list;
         this.running = new ArrayList<int[]>(1);
-        this.ready = new PriorityQueue<int[]>(SJF_comparator); //([arrival time], [index in processes+list])
+        this.ready = new Priority<int[]>(20,SJF_comparator); //([arrival time], [index in processes+list])
         this.blocked = new LinkedList<int[]>();
         this.terminate = false;
         this.vb_flag = vb_flag;
         this.TIME = 0;
         //order process following the tie rule
-        this.processes = new PriorityQueue<>(FCFS_comparator); // ([arrival time], [index in process_list])
+        this.processes = new Priority<>(20,FCFS_comparator); // ([arrival time], [index in process_list])
         for (Process p : this.processes_list) {
             int[] pair = new int[2];
             pair[0] = p.getArrive_time();
@@ -639,7 +642,7 @@ class SJF_class{
             }
         }
     }
-    public void update_block_SJF(LinkedList<int[]> blocked, PriorityQueue<int[]> ready, List<int[]> running,int TIME){
+    public void update_block_SJF(LinkedList<int[]> blocked, Priority<int[]> ready, List<int[]> running,int TIME){
         if (!blocked.isEmpty()){
             for (int i = 0; i < blocked.size();i++) {
                 int[] first_blocked = blocked.get(i);
@@ -671,7 +674,7 @@ class SJF_class{
         }
     }
 
-    public void update_ready_SJF(PriorityQueue<int[]> ready, List<int[]> running){
+    public void update_ready_SJF(Priority<int[]> ready, List<int[]> running){
         if (!ready.isEmpty()) {
             int[] first_ready = ready.peek();
             Process p = processes_list.get(first_ready[2]);
@@ -809,8 +812,8 @@ class SJF_class{
 class HPRN_class{
     ArrayList<Process> processes_list;
     ArrayList<int[]> running;
-    PriorityQueue<float[]> ready;
-    PriorityQueue<int[]>processes;
+    Priority<float[]> ready;
+    Priority<int[]>processes;
     LinkedList<int[]> blocked;
     int TIME, all_finished_time;
     boolean terminate, vb_flag;
@@ -818,16 +821,16 @@ class HPRN_class{
     public HPRN_class(boolean vb_flag, ArrayList<Process> processes_list){
         Comparator<int[]> FCFS_comparator = new FCFS_comparitor();
         Comparator<float[]> HPRN_comparator = new HPRN_comparitor();
-        this.processes = new PriorityQueue<>(FCFS_comparator);
+        this.processes = new Priority<>(20,FCFS_comparator);
         this.processes_list = processes_list;
         this.running = new ArrayList<int[]>(1);
-        this.ready = new PriorityQueue<float[]>(HPRN_comparator); //([arrival time], [index in processes+list])
+        this.ready = new Priority<float[]>(20, HPRN_comparator); //([arrival time], [index in processes+list])
         this.blocked = new LinkedList<int[]>();
         this.terminate = false;
         this.vb_flag = vb_flag;
         this.TIME = 0;
         //order process following the tie rule
-        this.processes = new PriorityQueue<>(FCFS_comparator); // ([arrival time], [index in process_list])
+        this.processes = new Priority<>(20,FCFS_comparator); // ([arrival time], [index in process_list])
         for (Process p : this.processes_list) {
             int[] pair = new int[2];
             pair[0] = p.getArrive_time();
@@ -898,7 +901,7 @@ class HPRN_class{
             }
         }
     }
-    public void update_block_HPRN(LinkedList<int[]> blocked, PriorityQueue<float[]> ready, List<int[]> running,int TIME){
+    public void update_block_HPRN(LinkedList<int[]> blocked, Priority<float[]> ready, List<int[]> running,int TIME){
         if (!blocked.isEmpty()){
             for (int i = 0; i < blocked.size();i++) {
                 int[] first_blocked = blocked.get(i);
@@ -930,7 +933,7 @@ class HPRN_class{
         }
     }
 
-    public void update_ready_HPRN(PriorityQueue<float[]> ready, List<int[]> running){
+    public void update_ready_HPRN(Priority<float[]> ready, List<int[]> running){
         if (!ready.isEmpty()) {
             float[] first_ready = ready.peek();
             Process p = processes_list.get((int) first_ready[2]);
@@ -1233,23 +1236,23 @@ class HPRN_comparitor implements Comparator<float[]>{
     }
 }
 
-class PriorityQueue<E> extends AbstractQueue<E>
-    implements java.io.Serializable {
+class Priority<E> extends AbstractQueue<E>
+        implements java.io.Serializable {
     private static final long serialVersionUID = -7720805057305804111L;
     private static final int DEFAULT_INITIAL_CAPACITY = 11;
     private transient Object[] queue;
     private int size = 0;
     private final Comparator<? super E> comparator;
     private transient int modCount = 0;
-    public PriorityQueue() {
+    public Priority() {
         this(DEFAULT_INITIAL_CAPACITY, null);
     }
 
-    public PriorityQueue(int initialCapacity) {
+    public Priority(int initialCapacity) {
         this(initialCapacity, null);
     }
 
-    public PriorityQueue(int initialCapacity,
+    public Priority(int initialCapacity,
                          Comparator<? super E> comparator) {
         if (initialCapacity < 1)
             throw new IllegalArgumentException();
@@ -1257,26 +1260,26 @@ class PriorityQueue<E> extends AbstractQueue<E>
         this.comparator = comparator;
     }
 
-    public PriorityQueue(Collection<? extends E> c) {
+    public Priority(Collection<? extends E> c) {
         initFromCollection(c);
         if (c instanceof SortedSet)
             comparator = (Comparator<? super E>)
-                ((SortedSet<? extends E>)c).comparator();
+                    ((SortedSet<? extends E>)c).comparator();
         else if (c instanceof PriorityQueue)
             comparator = (Comparator<? super E>)
-                ((PriorityQueue<? extends E>)c).comparator();
+                    ((PriorityQueue<? extends E>)c).comparator();
         else {
             comparator = null;
             heapify();
         }
     }
 
-    public PriorityQueue(PriorityQueue<? extends E> c) {
+    public Priority(PriorityQueue<? extends E> c) {
         comparator = (Comparator<? super E>)c.comparator();
         initFromCollection(c);
     }
 
-    public PriorityQueue(SortedSet<? extends E> c) {
+    public Priority(SortedSet<? extends E> c) {
         comparator = (Comparator<? super E>)c.comparator();
         initFromCollection(c);
     }
@@ -1296,8 +1299,8 @@ class PriorityQueue<E> extends AbstractQueue<E>
         int oldCapacity = queue.length;
         // Double size if small; else grow by 50%
         int newCapacity = ((oldCapacity < 64)?
-                           ((oldCapacity + 1) * 2):
-                           ((oldCapacity / 2) * 3));
+                ((oldCapacity + 1) * 2):
+                ((oldCapacity / 2) * 3));
         if (newCapacity < 0) // overflow
             newCapacity = Integer.MAX_VALUE;
         if (newCapacity < minCapacity)
@@ -1348,7 +1351,7 @@ class PriorityQueue<E> extends AbstractQueue<E>
             return true;
         }
     }
-    
+
     boolean removeEq(Object o) {
         for (int i = 0; i < size; i++) {
             if (o == queue[i]) {
@@ -1391,7 +1394,7 @@ class PriorityQueue<E> extends AbstractQueue<E>
 
         public boolean hasNext() {
             return cursor < size ||
-                (forgetMeNot != null && !forgetMeNot.isEmpty());
+                    (forgetMeNot != null && !forgetMeNot.isEmpty());
         }
 
         public E next() {
@@ -1412,7 +1415,7 @@ class PriorityQueue<E> extends AbstractQueue<E>
             if (expectedModCount != modCount)
                 throw new ConcurrentModificationException();
             if (lastRet != -1) {
-                E moved = PriorityQueue.this.removeAt(lastRet);
+                E moved = Priority.this.removeAt(lastRet);
                 lastRet = -1;
                 if (moved == null)
                     cursor--;
@@ -1422,7 +1425,7 @@ class PriorityQueue<E> extends AbstractQueue<E>
                     forgetMeNot.add(moved);
                 }
             } else if (lastRetElt != null) {
-                PriorityQueue.this.removeEq(lastRetElt);
+                Priority.this.removeEq(lastRetElt);
                 lastRetElt = null;
             } else {
                 throw new IllegalStateException();
@@ -1435,7 +1438,7 @@ class PriorityQueue<E> extends AbstractQueue<E>
         return size;
     }
 
-    
+
     public void clear() {
         modCount++;
         for (int i = 0; i < size; i++)
@@ -1522,7 +1525,7 @@ class PriorityQueue<E> extends AbstractQueue<E>
             Object c = queue[child];
             int right = child + 1;
             if (right < size &&
-                ((Comparable<? super E>) c).compareTo((E) queue[right]) > 0)
+                    ((Comparable<? super E>) c).compareTo((E) queue[right]) > 0)
                 c = queue[child = right];
             if (key.compareTo((E) c) <= 0)
                 break;
@@ -1539,7 +1542,7 @@ class PriorityQueue<E> extends AbstractQueue<E>
             Object c = queue[child];
             int right = child + 1;
             if (right < size &&
-                comparator.compare((E) c, (E) queue[right]) > 0)
+                    comparator.compare((E) c, (E) queue[right]) > 0)
                 c = queue[child = right];
             if (comparator.compare(x, (E) c) <= 0)
                 break;
@@ -1559,7 +1562,7 @@ class PriorityQueue<E> extends AbstractQueue<E>
     }
 
     private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException{
+            throws java.io.IOException{
         // Write out element count, and any hidden stuff
         s.defaultWriteObject();
 
@@ -1573,7 +1576,7 @@ class PriorityQueue<E> extends AbstractQueue<E>
 
 
     private void readObject(java.io.ObjectInputStream s)
-        throws java.io.IOException, ClassNotFoundException {
+            throws java.io.IOException, ClassNotFoundException {
         // Read in size, and any hidden stuff
         s.defaultReadObject();
 
