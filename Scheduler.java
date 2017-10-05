@@ -84,16 +84,16 @@ public class Scheduler {
         boolean vb_flag =false;
         String file_name;
 
-        /*
+        
         try {
             file_name = args[1];
             vb_flag = true;
         }catch (java.lang.ArrayIndexOutOfBoundsException e){
             file_name = args[0];
         }
-        */
+        
 
-        file_name = "input-7.txt";
+        //file_name = "input-7.txt";
         Scheduler ob_FCFS = new Scheduler(file_name, vb_flag);
         ob_FCFS.run_FCFS(vb_flag);
         Scheduler ob_RR = new Scheduler(file_name, vb_flag);
