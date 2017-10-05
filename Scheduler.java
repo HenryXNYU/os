@@ -688,7 +688,7 @@ class SJF_class{
                 ready.remove(first_ready);
             }else{
                 Comparator<int[]> c = new SJF_comparitor();
-                Priority<int[]> temp_queue = new PriorityQueue<>(20,c);
+                Priority<int[]> temp_queue = new Priority<>(20,c);
                 int[] temp = new int[3];
                 temp[0] = running.get(0)[0];
                 temp[1] = (int) calculate_time(processes_list.get(running.get(0)[1]));
