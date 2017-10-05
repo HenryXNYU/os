@@ -19,7 +19,7 @@ public class Scheduler {
 
         //read input
         Comparator<int[]> cp = new FCFS_comparitor();
-        PriorityQueue<int[]> sorted = new PriorityQueue<>(cp);
+        Priority<int[]> sorted = new Priority<>(20,cp);
         Scanner sc2 = new Scanner(new File(input_path));
         int A = -1, B = -1, C = -1, M = -1;
         int num_of_process = sc2.nextInt();
