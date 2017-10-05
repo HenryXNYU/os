@@ -688,7 +688,7 @@ class SJF_class{
                 ready.remove(first_ready);
             }else{
                 Comparator<int[]> c = new SJF_comparitor();
-                PriorityQueue<int[]> temp_queue = new PriorityQueue<>(c);
+                Priority<int[]> temp_queue = new PriorityQueue<>(20,c);
                 int[] temp = new int[3];
                 temp[0] = running.get(0)[0];
                 temp[1] = (int) calculate_time(processes_list.get(running.get(0)[1]));
@@ -947,7 +947,7 @@ class HPRN_class{
                 ready.remove(first_ready);
             }else{
                 Comparator<float[]> c = new HPRN_comparitor();
-                PriorityQueue<float[]> temp_queue = new PriorityQueue<float[]>(c);
+                Priority<float[]> temp_queue = new Priority<float[]>(20,c);
                 float[] temp = new float[3];
                 temp[0] = running.get(0)[0];
                 temp[1] = processes_list.get(running.get(0)[1]).penalty_ratio;
