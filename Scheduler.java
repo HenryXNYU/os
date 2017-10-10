@@ -7,6 +7,7 @@ import java.util.Comparator;
 
 public class Scheduler {
     ArrayList<Integer> random_numbers = new ArrayList<>();
+
     ArrayList<Process> processes_list = new ArrayList<Process>();
 
 
@@ -93,13 +94,17 @@ public class Scheduler {
         }
         
 
-        //file_name = "input-7.txt";
+        //file_name = "input-4.txt";
+
         Scheduler ob_FCFS = new Scheduler(file_name, vb_flag);
         ob_FCFS.run_FCFS(vb_flag);
+        
         Scheduler ob_RR = new Scheduler(file_name, vb_flag);
         ob_RR.run_RR(vb_flag);
+
         Scheduler ob_SJF = new Scheduler(file_name, vb_flag);
         ob_SJF.run_SJF(vb_flag);
+
         Scheduler ob_HPRN = new Scheduler(file_name, vb_flag);
         ob_HPRN.run_HPRN(vb_flag);
 
@@ -114,6 +119,9 @@ class RR_class{
     LinkedList<int[]> blocked;
     int TIME, all_finished_time, quantum;
     boolean terminate, vb_flag;
+    int random_number_count = 0;
+    int totalIO = 0;
+
 
     public RR_class(boolean vb_flag, ArrayList<Process> processes_list){
         Comparator<int[]> FCFS_comparator = new FCFS_comparitor();
@@ -142,13 +150,13 @@ class RR_class{
         int total_waiting = 0,total_turnaround = 0, total_io = 0, total_cpu = 0;
         for (Process p: processes_list){
             total_cpu += p.cpu_used;
-            total_io += p.io_used;
+            //total_io += p.io_used;
             total_turnaround += p.finishing_time - p.getArrive_time();
             total_waiting += p.finishing_time - p.getArrive_time() - p.getTotal_cpu_time() - p.io_used;
         }
 
         System.out.println("\tCPU Utilization: " + (float) total_cpu/finish_time);
-        System.out.println("\tIO Utilization: " + (float) total_io/finish_time);
+        System.out.println("\tIO Utilization: " + (float) this.totalIO/finish_time);
         System.out.println("\tThroughput " + 100*((float)num_of_processes/finish_time) + " per 100 cycles");
         System.out.println("\tAverage turnaround time:  " + (float) total_turnaround/num_of_processes);
         System.out.println("\tAverage waiting time: " + (float) total_waiting/num_of_processes);
@@ -218,7 +226,8 @@ class RR_class{
                 if (p.io_burst < 1) {
                     if (running.isEmpty() && ready.isEmpty()) {
                         running.add(first_blocked);
-                        processes_list.get(running.get(0)[1]).set_burst();
+                        processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                        this.random_number_count++;
                         p.setState("Running");
                         blocked.remove(first_blocked);
                     } else {
@@ -239,7 +248,8 @@ class RR_class{
                 running.add(first_ready);
                 Process temp = processes_list.get(running.get(0)[1]);
                 if (temp.getCpu_burst() == 0) {
-                    temp.set_burst();
+                    temp.set_burst(this.random_number_count);
+                    this.random_number_count++;
                 }else if (temp.getCpu_burst() >= 2){
                     temp.RR_cpu_burst = this.quantum;
                 }else{
@@ -280,7 +290,8 @@ class RR_class{
                     update_block_RR(blocked, ready, running, TIME);
                     if (running.isEmpty()) {
                         running.add(processes.peek());
-                        processes_list.get(running.get(0)[1]).set_burst();
+                        processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                        this.random_number_count++;
                         processes_list.get(processes.peek()[1]).setState("Running");
                         processes.remove(processes.peek());
                     } else {
@@ -331,6 +342,10 @@ class RR_class{
                 //processes_list.get(blocked.peek()[1]).update(0,1);
             }
 
+            //TODO
+            if (blocked.size()!= 0){
+                this.totalIO++;
+            }
             update_run_RR(blocked, running, TIME);
         }
     }
@@ -343,6 +358,8 @@ class FCFS_class {
     LinkedList<int[]> blocked;
     int TIME, all_finished_time;
     boolean terminate, vb_flag;
+    int random_number_count;
+    int totalIO;
 
     public FCFS_class(boolean vb_flag, ArrayList<Process> processes_list) {
         Comparator<int[]> FCFS_comparator = new FCFS_comparitor();
@@ -377,7 +394,7 @@ class FCFS_class {
         }
 
         System.out.println("\tCPU Utilization: " + (float) total_cpu/finish_time);
-        System.out.println("\tIO Utilization: " + (float) total_io/finish_time);
+        System.out.println("\tIO Utilization: " + (float) totalIO/finish_time);
         System.out.println("\tThroughput " + 100*((float)num_of_processes/finish_time) + " per 100 cycles");
         System.out.println("\tAverage turnaround time:  " + (float) total_turnaround/num_of_processes);
         System.out.println("\tAverage waiting time: " + (float) total_waiting/num_of_processes);
@@ -442,7 +459,8 @@ class FCFS_class {
                 if (p.io_burst < 1) {
                     if (running.isEmpty() && ready.isEmpty()) {
                         running.add(first_blocked);
-                        processes_list.get(running.get(0)[1]).set_burst();
+                        processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                        this.random_number_count++;
                         p.setState("Running");
                         blocked.remove(first_blocked);
                     } else {
@@ -461,7 +479,8 @@ class FCFS_class {
             Process p = processes_list.get(first_ready[1]);
             if (running.isEmpty()) {
                 running.add(first_ready);
-                processes_list.get(running.get(0)[1]).set_burst();
+                processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                this.random_number_count++;
                 p.setState("Running");
                 ready.remove(first_ready);
             }
@@ -497,7 +516,8 @@ class FCFS_class {
                     update_block_FCFS(blocked, ready, running, TIME);
                     if (running.isEmpty()) {
                         running.add(processes.peek());
-                        processes_list.get(running.get(0)[1]).set_burst();
+                        processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                        this.random_number_count++;
                         processes_list.get(processes.peek()[1]).setState("Running");
                         processes.remove(processes.peek());
                     } else {
@@ -545,6 +565,9 @@ class FCFS_class {
                 }
                 //processes_list.get(blocked.peek()[1]).update(0,1);
             }
+            if (blocked.size() != 0){
+                this.totalIO++;
+            }
 
             update_run_FCFS(blocked, running, TIME);
         }
@@ -558,6 +581,8 @@ class SJF_class{
     LinkedList<int[]> blocked;
     int TIME, all_finished_time;
     boolean terminate, vb_flag;
+    int random_number_count;
+    int totalIO = 0;
 
     public SJF_class(boolean vb_flag, ArrayList<Process> processes_list){
         Comparator<int[]> SJF_comparator = new SJF_comparitor();
@@ -592,7 +617,7 @@ class SJF_class{
         }
 
         System.out.println("\tCPU Utilization: " + (float) total_cpu/finish_time);
-        System.out.println("\tIO Utilization: " + (float) total_io/finish_time);
+        System.out.println("\tIO Utilization: " + (float) totalIO/finish_time);
         System.out.println("\tThroughput " + 100*((float)num_of_processes/finish_time) + " per 100 cycles");
         System.out.println("\tAverage turnaround time:  " + (float) total_turnaround/num_of_processes);
         System.out.println("\tAverage waiting time: " + (float) total_waiting/num_of_processes);
@@ -657,7 +682,8 @@ class SJF_class{
                 if (p.io_burst < 1) {
                     if (running.isEmpty() && ready.isEmpty()) {
                         running.add(first_blocked);
-                        processes_list.get(running.get(0)[1]).set_burst();
+                        processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                        this.random_number_count++;
                         p.setState("Running");
                         blocked.remove(first_blocked);
                     } else {
@@ -683,12 +709,13 @@ class SJF_class{
                 temp[0] = first_ready[0];
                 temp[1] = first_ready[2];
                 running.add(temp);
-                processes_list.get(running.get(0)[1]).set_burst();
+                processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                this.random_number_count++;
                 p.setState("Running");
                 ready.remove(first_ready);
             }else{
                 Comparator<int[]> c = new SJF_comparitor();
-                Priority<int[]> temp_queue = new Priority<>(20,c);
+                PriorityQueue<int[]> temp_queue = new PriorityQueue<>(c);
                 int[] temp = new int[3];
                 temp[0] = running.get(0)[0];
                 temp[1] = (int) calculate_time(processes_list.get(running.get(0)[1]));
@@ -751,7 +778,8 @@ class SJF_class{
 
                     if (running.isEmpty()) {
                         running.add(processes.peek());
-                        processes_list.get(running.get(0)[1]).set_burst();
+                        processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                        this.random_number_count++;
                         processes_list.get(processes.peek()[1]).setState("Running");
                         processes.remove(processes.peek());
                     } else {
@@ -804,6 +832,9 @@ class SJF_class{
                     processes_list.get(b[1]).update(0, 1);
                 }
             }
+            if (blocked.size() != 0){
+                this.totalIO++;
+            }
             update_run_SJF(blocked, running, TIME);
         }
     }
@@ -817,6 +848,8 @@ class HPRN_class{
     LinkedList<int[]> blocked;
     int TIME, all_finished_time;
     boolean terminate, vb_flag;
+    int random_number_count;
+    int totalIO = 0;
 
     public HPRN_class(boolean vb_flag, ArrayList<Process> processes_list){
         Comparator<int[]> FCFS_comparator = new FCFS_comparitor();
@@ -851,7 +884,7 @@ class HPRN_class{
         }
 
         System.out.println("\tCPU Utilization: " + (float) total_cpu/finish_time);
-        System.out.println("\tIO Utilization: " + (float) total_io/finish_time);
+        System.out.println("\tIO Utilization: " + (float) totalIO/finish_time);
         System.out.println("\tThroughput " + 100*((float)num_of_processes/finish_time) + " per 100 cycles");
         System.out.println("\tAverage turnaround time:  " + (float) total_turnaround/num_of_processes);
         System.out.println("\tAverage waiting time: " + (float) total_waiting/num_of_processes);
@@ -916,7 +949,8 @@ class HPRN_class{
                 if (p.io_burst < 1) {
                     if (running.isEmpty() && ready.isEmpty()) {
                         running.add(first_blocked);
-                        processes_list.get(running.get(0)[1]).set_burst();
+                        processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                        this.random_number_count++;
                         p.setState("Running");
                         blocked.remove(first_blocked);
                     } else {
@@ -942,12 +976,13 @@ class HPRN_class{
                 temp[0] = (int) first_ready[0];
                 temp[1] = (int) first_ready[2];
                 running.add(temp);
-                processes_list.get(running.get(0)[1]).set_burst();
+                processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                this.random_number_count++;
                 p.setState("Running");
                 ready.remove(first_ready);
             }else{
                 Comparator<float[]> c = new HPRN_comparitor();
-                Priority<float[]> temp_queue = new Priority<float[]>(20,c);
+                PriorityQueue<float[]> temp_queue = new PriorityQueue<float[]>(c);
                 float[] temp = new float[3];
                 temp[0] = running.get(0)[0];
                 temp[1] = processes_list.get(running.get(0)[1]).penalty_ratio;
@@ -1024,7 +1059,8 @@ class HPRN_class{
                     }
                     if (running.isEmpty()) {
                         running.add(processes.peek());
-                        processes_list.get(running.get(0)[1]).set_burst();
+                        processes_list.get(running.get(0)[1]).set_burst(this.random_number_count);
+                        this.random_number_count++;
                         processes_list.get(processes.peek()[1]).setState("Running");
                         processes.remove(processes.peek());
                     } else {
@@ -1077,6 +1113,9 @@ class HPRN_class{
                 }
                 //processes_list.get(blocked.peek()[1]).update(0,1);
             }
+            if (blocked.size() != 0){
+                this.totalIO++;
+            }
             TIME++;
             update_run_HPRN(blocked, running, TIME);
         }
@@ -1107,14 +1146,16 @@ class Process{
         this.random_numbers = random_numbers;
     }
 
-    public int randomOS(boolean vb_flag, int UDRI_interval,int total_cpu_time, ArrayList<Integer> random_numbers){
-        Random rd = new Random();
-        int x = rd.nextInt(random_numbers.size());
-        x = 1 + (x % UDRI_interval);
-        //System.out.println("Find burst when choosing ready process to run" + " "+x);
+    public int randomOS(boolean vb_flag, int UDRI_interval,int total_cpu_time, int random_num_count,ArrayList<Integer> random_numbers){
+        //Random rd = new Random();
+        int x = random_numbers.get(random_num_count);
+        random_num_count++;
         if (vb_flag){
             System.out.println("Find burst when choosing ready process to run" + " "+x);
         }
+        x = 1 + (x % UDRI_interval);
+        //System.out.println("Find burst when choosing ready process to run" + " "+x);
+
         return x;
     }
 
@@ -1127,8 +1168,8 @@ class Process{
         this.RR_cpu_burst -= CPU * 1;
     }
 
-    public void set_burst(){
-        int randomOS = randomOS(this.vb_flag, this.UDRI, this.total_cpu_time, this.random_numbers);
+    public void set_burst(int random_number_count){
+        int randomOS = randomOS(this.vb_flag, this.UDRI, this.total_cpu_time, random_number_count,this.random_numbers);
         if (randomOS > this.total_cpu_time-this.cpu_used){
             this.cpu_burst = this.total_cpu_time-this.cpu_used;
             if (this.cpu_burst >= this.quantum){
